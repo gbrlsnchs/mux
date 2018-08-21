@@ -1,7 +1,6 @@
 package mux
 
 import (
-	"bytes"
 	"context"
 	"net/http"
 
@@ -21,9 +20,6 @@ type Mux struct {
 
 // New creates a new HTTP multiplexer.
 func New(path string) *Mux {
-	if len(path) == 0 {
-		path = "/"
-	}
 	return &Mux{
 		path:    []byte(path),
 		methods: make(map[string]*radix.Tree, 9),
@@ -32,12 +28,15 @@ func New(path string) *Mux {
 
 // Handle handles an HTTP handler according to a method and a path.
 func (m *Mux) Handle(method, path string, handler http.Handler) {
-	fpn := m.resolvePath([]byte(path))
-	chain := Chain(m.fns...)(handler)
-	if m.methods[method] == nil {
-		m.methods[method] = radix.New()
+	m.handle(method, []byte(path), handler)
+}
+
+// Router creates a prefixed mux.
+func (m *Mux) Router(path string) *Router {
+	return &Router{
+		m:    m,
+		path: []byte(path),
 	}
-	m.methods[method].Add(fpn, chain)
 }
 
 // ServeHTTP implements the http.Handler interface by finding an endpoint in the trie.
@@ -72,16 +71,24 @@ func (m *Mux) Use(fns ...MiddlewareFunc) {
 	m.fns = fns
 }
 
+func (m *Mux) handle(method string, path []byte, handler http.Handler) {
+	fpn := m.resolvePath(path)
+	chain := Chain(m.fns...)(handler)
+	if m.methods[method] == nil {
+		m.methods[method] = radix.New()
+	}
+	m.methods[method].Add(fpn, chain)
+}
+
 func (m *Mux) resolvePath(path []byte) []byte {
-	var (
-		buf bytes.Buffer
-		b   []byte
-		l   int
-	)
-	buf.Write(m.path)
-	buf.Write(path)
-	if b, l = buf.Bytes(), buf.Len(); l > 1 && b[0] == '/' && b[1] == '/' {
-		return b[1:]
+	b := make([]byte, 0, len(path))
+	b = append(b, m.path...)
+	b = append(b, path...)
+	if len(b) == 0 {
+		return append(b, '/')
+	}
+	for len(b) > 1 && b[0] == '/' && b[1] == '/' {
+		b = b[1:]
 	}
 	return b
 }

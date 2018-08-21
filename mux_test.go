@@ -13,7 +13,7 @@ import (
 var params = make(Params)
 
 func TestMux(t *testing.T) {
-	testTable := []struct {
+	testCases := []struct {
 		method   string
 		requests map[string]int
 		m        *Mux
@@ -193,21 +193,21 @@ func TestMux(t *testing.T) {
 		},
 	}
 
-	for ttNum, tt := range testTable {
-		t.Run(fmt.Sprintf("%s %#v", tt.method, tt.requests), func(t *testing.T) {
-			tt.m.SetCtxKey(CtxKey)
-			tt.m.Use(tt.fns...)
+	for _, tc := range testCases {
+		t.Run(fmt.Sprintf("%s %#v", tc.method, tc.requests), func(t *testing.T) {
+			tc.m.SetCtxKey(CtxKey)
+			tc.m.Use(tc.fns...)
 
-			for path, handler := range tt.handlers {
-				tt.m.Handle(tt.method, path, handler)
+			for path, handler := range tc.handlers {
+				tc.m.Handle(tc.method, path, handler)
 			}
-			for path, status := range tt.requests {
+			for path, status := range tc.requests {
 				w := httptest.NewRecorder()
-				r := httptest.NewRequest(tt.method, path, nil)
+				r := httptest.NewRequest(tc.method, path, nil)
 
-				tt.m.ServeHTTP(w, r)
-				if want, get := status, w.Code; want != get {
-					t.Errorf("test #%d, handler \"%s\": want %d, got %d\n", ttNum+1, path, want, get)
+				tc.m.ServeHTTP(w, r)
+				if want, got := status, w.Code; want != got {
+					t.Errorf("want %d, got %d", want, got)
 				}
 			}
 		})
