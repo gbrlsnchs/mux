@@ -21,6 +21,9 @@ type Mux struct {
 
 // New creates a new HTTP multiplexer.
 func New(path string) *Mux {
+	if len(path) == 0 {
+		path = "/"
+	}
 	return &Mux{
 		path:    []byte(path),
 		methods: make(map[string]*radix.Tree, 9),
