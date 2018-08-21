@@ -114,7 +114,7 @@ func TestTree(t *testing.T) {
 			for i := range tt.reqs {
 				n, params := tree.Get([]byte(tt.reqs[i]))
 				if want, got := tt.expect, n != nil; want != got {
-					t.Errorf("want %t, got %t\n", want, got)
+					t.Errorf("want %t, got %t", want, got)
 				}
 				for k := range params {
 					pmap[k] = params[k]
@@ -124,7 +124,7 @@ func TestTree(t *testing.T) {
 				pmap = nil
 			}
 			if want, got := tt.params, pmap; !reflect.DeepEqual(want, got) {
-				t.Errorf("want %#v, got %#v\n", want, got)
+				t.Errorf("want %#v, got %#v", want, got)
 			}
 		})
 	}
