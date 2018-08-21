@@ -1,6 +1,7 @@
 package mux_test
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -20,7 +21,6 @@ func TestMux(t *testing.T) {
 		handlers map[string]http.Handler
 		params   Params
 	}{
-		// #1: Simple match without mux prefix.
 		{
 			method: http.MethodGet,
 			requests: map[string]int{
@@ -33,7 +33,6 @@ func TestMux(t *testing.T) {
 				}),
 			},
 		},
-		// #2: Simple match with mux prefix.
 		{
 			method: http.MethodGet,
 			requests: map[string]int{
@@ -46,7 +45,6 @@ func TestMux(t *testing.T) {
 				}),
 			},
 		},
-		// #3: Route with different method.
 		{
 			method: http.MethodPost,
 			requests: map[string]int{
@@ -59,7 +57,6 @@ func TestMux(t *testing.T) {
 				}),
 			},
 		},
-		// #4: Route not found without mux prefix.
 		{
 			method: http.MethodGet,
 			requests: map[string]int{
@@ -72,7 +69,6 @@ func TestMux(t *testing.T) {
 				}),
 			},
 		},
-		// #5: Route not found with mux prefix.
 		{
 			method: http.MethodGet,
 			requests: map[string]int{
@@ -85,7 +81,6 @@ func TestMux(t *testing.T) {
 				}),
 			},
 		},
-		// #6: Route with one middleware.
 		{
 			method: http.MethodGet,
 			requests: map[string]int{
@@ -105,7 +100,6 @@ func TestMux(t *testing.T) {
 				}),
 			},
 		},
-		// #7: Route with two middlewares.
 		{
 			method: http.MethodGet,
 			requests: map[string]int{
@@ -130,7 +124,6 @@ func TestMux(t *testing.T) {
 				}),
 			},
 		},
-		// #8: Route with middleware termination.
 		{
 			method: http.MethodGet,
 			requests: map[string]int{
@@ -150,23 +143,37 @@ func TestMux(t *testing.T) {
 				}),
 			},
 		},
+		{
+			method: http.MethodGet,
+			requests: map[string]int{
+				"/": http.StatusOK,
+			},
+			m: New("/"),
+			handlers: map[string]http.Handler{
+				"/test": http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+					w.WriteHeader(http.StatusOK)
+				}),
+			},
+		},
 	}
 
 	for ttNum, tt := range testTable {
-		tt.m.SetCtxKey(CtxKey)
-		tt.m.Use(tt.fns...)
+		t.Run(fmt.Sprintf("%s %#v", tt.method, tt.requests), func(t *testing.T) {
+			tt.m.SetCtxKey(CtxKey)
+			tt.m.Use(tt.fns...)
 
-		for path, handler := range tt.handlers {
-			tt.m.Handle(tt.method, path, handler)
-		}
-		for path, status := range tt.requests {
-			w := httptest.NewRecorder()
-			r := httptest.NewRequest(tt.method, path, nil)
-
-			tt.m.ServeHTTP(w, r)
-			if want, get := status, w.Code; want != get {
-				t.Errorf("test #%d, handler \"%s\": want %d, got %d\n", ttNum+1, path, want, get)
+			for path, handler := range tt.handlers {
+				tt.m.Handle(tt.method, path, handler)
 			}
-		}
+			for path, status := range tt.requests {
+				w := httptest.NewRecorder()
+				r := httptest.NewRequest(tt.method, path, nil)
+
+				tt.m.ServeHTTP(w, r)
+				if want, get := status, w.Code; want != get {
+					t.Errorf("test #%d, handler \"%s\": want %d, got %d\n", ttNum+1, path, want, get)
+				}
+			}
+		})
 	}
 }

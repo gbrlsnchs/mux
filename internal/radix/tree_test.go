@@ -1,6 +1,7 @@
 package radix_test
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -85,28 +86,30 @@ func TestTree(t *testing.T) {
 		},
 	}
 	for _, tt := range testTable {
-		tree := New()
-		// First, add all labels to the tree,
-		// forcing every kind of insertion case.
-		for i := range tt.paths {
-			tree.Add([]byte(tt.paths[i]), handler)
-		}
+		t.Run(fmt.Sprintf("%#v", tt.reqs), func(t *testing.T) {
+			tree := New()
+			// First, add all labels to the tree,
+			// forcing every kind of insertion case.
+			for i := range tt.paths {
+				tree.Add([]byte(tt.paths[i]), handler)
+			}
 
-		pmap := make(map[string][]byte)
-		for i := range tt.reqs {
-			n, params := tree.Get([]byte(tt.reqs[i]))
-			if want, got := true, n != nil; want != got {
-				t.Errorf("want %t, got %t\n", want, got)
+			pmap := make(map[string][]byte)
+			for i := range tt.reqs {
+				n, params := tree.Get([]byte(tt.reqs[i]))
+				if want, got := true, n != nil; want != got {
+					t.Errorf("want %t, got %t\n", want, got)
+				}
+				for k := range params {
+					pmap[k] = params[k]
+				}
 			}
-			for k := range params {
-				pmap[k] = params[k]
+			if len(pmap) == 0 {
+				pmap = nil
 			}
-		}
-		if len(pmap) == 0 {
-			pmap = nil
-		}
-		if want, got := tt.params, pmap; !reflect.DeepEqual(want, got) {
-			t.Errorf("want %#v, got %#v\n", want, got)
-		}
+			if want, got := tt.params, pmap; !reflect.DeepEqual(want, got) {
+				t.Errorf("want %#v, got %#v\n", want, got)
+			}
+		})
 	}
 }
