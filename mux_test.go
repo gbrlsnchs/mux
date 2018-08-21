@@ -150,7 +150,7 @@ func TestMux(t *testing.T) {
 			},
 			m: New("/"),
 			handlers: map[string]http.Handler{
-				"/test": http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				"/": http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 					w.WriteHeader(http.StatusOK)
 				}),
 			},
