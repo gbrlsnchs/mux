@@ -24,7 +24,7 @@ func New() *Tree {
 
 // Add adds a new node to the tree according to the label.
 func (t *Tree) Add(label []byte, handler http.Handler) {
-	if handler == nil {
+	if len(label) == 0 || handler == nil {
 		return
 	}
 
@@ -108,6 +108,9 @@ sort:
 
 // Get retrieves an http.Handler and a map of parameters according to the matching label.
 func (t *Tree) Get(label []byte) (*Node, map[string][]byte) {
+	if len(label) == 0 {
+		return nil, nil
+	}
 	tnode := t.root
 	var params map[string][]byte
 	for tnode != nil && len(label) > 0 {

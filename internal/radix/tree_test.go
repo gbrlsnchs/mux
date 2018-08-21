@@ -18,6 +18,7 @@ func TestTree(t *testing.T) {
 		paths  []string
 		reqs   []string
 		params map[string][]byte
+		expect bool
 	}{
 		{
 			paths: []string{
@@ -26,6 +27,7 @@ func TestTree(t *testing.T) {
 			reqs: []string{
 				"/test",
 			},
+			expect: true,
 		},
 		{
 			paths: []string{
@@ -36,6 +38,7 @@ func TestTree(t *testing.T) {
 				"/test",
 				"/testing",
 			},
+			expect: true,
 		},
 		{
 			paths: []string{
@@ -48,6 +51,7 @@ func TestTree(t *testing.T) {
 				"/team",
 				"/testing",
 			},
+			expect: true,
 		},
 		{
 			paths: []string{
@@ -59,6 +63,7 @@ func TestTree(t *testing.T) {
 			params: map[string][]byte{
 				"name": []byte("hello"),
 			},
+			expect: true,
 		},
 		{
 			paths: []string{
@@ -72,6 +77,7 @@ func TestTree(t *testing.T) {
 				"name2": []byte("hello2"),
 				"name3": []byte("hello3"),
 			},
+			expect: true,
 		},
 		{
 			paths: []string{
@@ -83,6 +89,16 @@ func TestTree(t *testing.T) {
 			params: map[string][]byte{
 				"name": []byte("hello"),
 			},
+			expect: true,
+		},
+		{
+			paths: []string{
+				"",
+			},
+			reqs: []string{
+				"",
+			},
+			expect: false,
 		},
 	}
 	for _, tt := range testTable {
@@ -97,7 +113,7 @@ func TestTree(t *testing.T) {
 			pmap := make(map[string][]byte)
 			for i := range tt.reqs {
 				n, params := tree.Get([]byte(tt.reqs[i]))
-				if want, got := true, n != nil; want != got {
+				if want, got := tt.expect, n != nil; want != got {
 					t.Errorf("want %t, got %t\n", want, got)
 				}
 				for k := range params {
