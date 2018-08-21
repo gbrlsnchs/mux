@@ -155,6 +155,42 @@ func TestMux(t *testing.T) {
 				}),
 			},
 		},
+		{
+			method: http.MethodGet,
+			requests: map[string]int{
+				"/": http.StatusOK,
+			},
+			m: New(""),
+			handlers: map[string]http.Handler{
+				"/": http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+					w.WriteHeader(http.StatusOK)
+				}),
+			},
+		},
+		{
+			method: http.MethodGet,
+			requests: map[string]int{
+				"/": http.StatusOK,
+			},
+			m: New("/"),
+			handlers: map[string]http.Handler{
+				"": http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+					w.WriteHeader(http.StatusOK)
+				}),
+			},
+		},
+		{
+			method: http.MethodGet,
+			requests: map[string]int{
+				"/": http.StatusOK,
+			},
+			m: New(""),
+			handlers: map[string]http.Handler{
+				"": http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+					w.WriteHeader(http.StatusOK)
+				}),
+			},
+		},
 	}
 
 	for ttNum, tt := range testTable {
