@@ -11,7 +11,7 @@ It's fast, simple and supports middlewares in an elegant way.
 ## Usage
 Full documentation [here].
 
-## Examples
+## Example
 ### Simple usage
 ```go
 handler := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
