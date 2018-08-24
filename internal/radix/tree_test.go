@@ -17,7 +17,7 @@ func TestTree(t *testing.T) {
 	testTable := []struct {
 		paths  []string
 		reqs   []string
-		params map[string][]byte
+		params map[string]string
 		expect bool
 	}{
 		{
@@ -60,8 +60,8 @@ func TestTree(t *testing.T) {
 			reqs: []string{
 				"/test/hello",
 			},
-			params: map[string][]byte{
-				"name": []byte("hello"),
+			params: map[string]string{
+				"name": "hello",
 			},
 			expect: true,
 		},
@@ -72,10 +72,10 @@ func TestTree(t *testing.T) {
 			reqs: []string{
 				"/test/hello1/hello2/hello3",
 			},
-			params: map[string][]byte{
-				"name1": []byte("hello1"),
-				"name2": []byte("hello2"),
-				"name3": []byte("hello3"),
+			params: map[string]string{
+				"name1": "hello1",
+				"name2": "hello2",
+				"name3": "hello3",
 			},
 			expect: true,
 		},
@@ -86,8 +86,8 @@ func TestTree(t *testing.T) {
 			reqs: []string{
 				"/test/hello/testing",
 			},
-			params: map[string][]byte{
-				"name": []byte("hello"),
+			params: map[string]string{
+				"name": "hello",
 			},
 			expect: true,
 		},
@@ -110,7 +110,7 @@ func TestTree(t *testing.T) {
 				tree.Add([]byte(tt.paths[i]), handler)
 			}
 
-			pmap := make(map[string][]byte)
+			pmap := make(map[string]string)
 			for i := range tt.reqs {
 				n, params := tree.Get([]byte(tt.reqs[i]))
 				if want, got := tt.expect, n != nil; want != got {

@@ -107,12 +107,12 @@ sort:
 }
 
 // Get retrieves an http.Handler and a map of parameters according to the matching label.
-func (t *Tree) Get(label []byte) (*Node, map[string][]byte) {
+func (t *Tree) Get(label []byte) (*Node, map[string]string) {
 	if len(label) == 0 {
 		return nil, nil
 	}
 	tnode := t.root
-	var params map[string][]byte
+	var params map[string]string
 	for tnode != nil && len(label) > 0 {
 		var next *edge
 	walk:
@@ -160,9 +160,9 @@ func (t *Tree) Get(label []byte) (*Node, map[string][]byte) {
 				}
 
 				if params == nil {
-					params = make(map[string][]byte)
+					params = make(map[string]string)
 				}
-				params[string(key)] = label[:delimIndex]
+				params[string(key)] = string(label[:delimIndex])
 
 				label = label[delimIndex:]
 				if len(slice) == 0 && len(label) == 0 {
