@@ -30,7 +30,7 @@ simply create a middleware chain to pass as the handler:
 	// Check credentials.
 	authFunc := func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			params, ok := r.Context().Value("params_ctx_key").(Params); !ok || params.Get("secret") != "g0_v3g4n" {
+			params, ok := r.Context().Value("params_ctx_key").(mux.Params); !ok || params.Get("secret") != "g0_v3g4n" {
 				w.WriteHeader(http.StatusUnauthorized)
 				return
 			}
