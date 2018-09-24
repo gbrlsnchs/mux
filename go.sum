@@ -1,4 +1,13 @@
-github.com/golang/mock v1.1.1 h1:G5FRp8JnTd7RQH5kemVNlMeyXQAztQ3mOWV95KxsXH8=
-github.com/golang/mock v1.1.1/go.mod h1:oTYuIxOrZwtPieC+H1uAHpcLFnEyAGVDL/k47Jfbm0A=
-golang.org/x/net v0.0.0-20180730214132-a0f8a16cb08c h1:Y75oIzobXQtxw3Lg3olbNCeFm8domyDYt1Lli7PMTSY=
-golang.org/x/net v0.0.0-20180730214132-a0f8a16cb08c/go.mod h1:mL1N/T3taQHkDXs73rZJwtUhF3w3ftmwwsq0BUmARs4=
+github.com/fatih/color v1.6.0/go.mod h1:Zm6kSWBoL9eyXnKyktHP6abPY2pDugNf5KwzbycvMj4=
+github.com/fatih/color v1.7.0 h1:DkWD4oS2D8LGGgTQ6IvwJJXSL5Vp2ffcQg58nFV38Ys=
+github.com/fatih/color v1.7.0/go.mod h1:Zm6kSWBoL9eyXnKyktHP6abPY2pDugNf5KwzbycvMj4=
+github.com/gbrlsnchs/radix v1.0.0-beta.0 h1:mRBO7NuDZE7h4dal+mo8YcG2VTcZf8FMC++cxjLnKR4=
+github.com/gbrlsnchs/radix v1.0.0-beta.0/go.mod h1:PdKwtrLfTiUa3x6XS+gpFT6L/QM5OOqqoHsfOpgYvyo=
+github.com/mattn/go-colorable v0.0.9 h1:UVL0vNpWh04HeJXV0KLcaT7r06gOH2l4OW6ddYRUIY4=
+github.com/mattn/go-colorable v0.0.9/go.mod h1:9vuHe8Xs5qXnSaW/c/ABM9alt+Vo+STaOChaDxuIBZU=
+github.com/mattn/go-isatty v0.0.3/go.mod h1:M+lRXTBqGeGNdLjl/ufCoiOlB5xdOkqRJdNxMWT7Zi4=
+github.com/mattn/go-isatty v0.0.4 h1:bnP0vzxcAdeI1zdubAl5PjU6zsERjGZb7raWodagDYs=
+github.com/mattn/go-isatty v0.0.4/go.mod h1:M+lRXTBqGeGNdLjl/ufCoiOlB5xdOkqRJdNxMWT7Zi4=
+golang.org/x/sys v0.0.0-20180315095008-cc7307a45468/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
+golang.org/x/sys v0.0.0-20180924175946-90868a75fefd h1:ELJRxcWg6//yYBDjuf/SnMg1+X0jj5+BP5xXF31wl4w=
+golang.org/x/sys v0.0.0-20180924175946-90868a75fefd/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
