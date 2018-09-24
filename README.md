@@ -1,6 +1,7 @@
 # mux (HTTP multiplexer for Go)
 [![Build Status](https://travis-ci.org/gbrlsnchs/mux.svg?branch=master)](https://travis-ci.org/gbrlsnchs/mux)
 [![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg)](https://godoc.org/github.com/gbrlsnchs/mux)
+[![Sourcegraph](https://sourcegraph.com/github.com/gbrlsnchs/mux/-/badge.svg)](https://sourcegraph.com/github.com/gbrlsnchs/mux?badge)
 
 ## About
 This is a complete rewrite of [httpmux], a now deprecated HTTP multiplexer.
