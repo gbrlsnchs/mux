@@ -57,7 +57,7 @@ func loggingFunc(next http.Handler) http.Handler {
 ```
 
 #### Then, create a router and use the middleware in all requests
-```
+```go
 rt := mux.NewRouter("/api")
 rt.Use(loggingFunc)
 rt.Handle(http.MethodGet, "/ping", func(w http.ResponseWriter, _ *http.Request) {
