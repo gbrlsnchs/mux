@@ -10,9 +10,11 @@ import (
 	. "github.com/gbrlsnchs/mux"
 )
 
-const paramsKey = "params"
+type key uint8
 
-var params Params
+const ctxKey key = 0
+
+var params map[string]string
 
 func TestRouter(t *testing.T) {
 	testCases := []struct {
@@ -21,14 +23,14 @@ func TestRouter(t *testing.T) {
 		rt       *Router
 		fns      []MiddlewareFunc
 		handlers map[string]http.Handler
-		params   map[string]Params
+		params   map[string]map[string]string
 	}{
 		{
 			method: http.MethodGet,
 			requests: map[string]int{
 				"/test": http.StatusOK,
 			},
-			rt: New("/"),
+			rt: NewRouter("/", ctxKey),
 			handlers: map[string]http.Handler{
 				"/test": http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 					w.WriteHeader(http.StatusOK)
@@ -40,7 +42,7 @@ func TestRouter(t *testing.T) {
 			requests: map[string]int{
 				"/test": http.StatusOK,
 			},
-			rt: New("/test"),
+			rt: NewRouter("/test", ctxKey),
 			handlers: map[string]http.Handler{
 				"": http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 					w.WriteHeader(http.StatusOK)
@@ -52,7 +54,7 @@ func TestRouter(t *testing.T) {
 			requests: map[string]int{
 				"/test": http.StatusOK,
 			},
-			rt: New("/test"),
+			rt: NewRouter("/test", ctxKey),
 			handlers: map[string]http.Handler{
 				"": http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 					w.WriteHeader(http.StatusOK)
@@ -64,7 +66,7 @@ func TestRouter(t *testing.T) {
 			requests: map[string]int{
 				"/test": http.StatusNotFound,
 			},
-			rt: New("/"),
+			rt: NewRouter("/", ctxKey),
 			handlers: map[string]http.Handler{
 				"/testing": http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 					w.WriteHeader(http.StatusOK)
@@ -76,7 +78,7 @@ func TestRouter(t *testing.T) {
 			requests: map[string]int{
 				"/test": http.StatusNotFound,
 			},
-			rt: New("/testing"),
+			rt: NewRouter("/testing", ctxKey),
 			handlers: map[string]http.Handler{
 				"/testing": http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 					w.WriteHeader(http.StatusOK)
@@ -88,7 +90,7 @@ func TestRouter(t *testing.T) {
 			requests: map[string]int{
 				"/test": http.StatusOK,
 			},
-			rt: New("/"),
+			rt: NewRouter("/", ctxKey),
 			fns: []MiddlewareFunc{
 				func(next http.Handler) http.Handler {
 					return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -107,7 +109,7 @@ func TestRouter(t *testing.T) {
 			requests: map[string]int{
 				"/test": http.StatusOK,
 			},
-			rt: New("/"),
+			rt: NewRouter("/", ctxKey),
 			fns: []MiddlewareFunc{
 				func(next http.Handler) http.Handler {
 					return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -131,7 +133,7 @@ func TestRouter(t *testing.T) {
 			requests: map[string]int{
 				"/test": http.StatusBadRequest,
 			},
-			rt: New("/"),
+			rt: NewRouter("/", ctxKey),
 			fns: []MiddlewareFunc{
 				func(next http.Handler) http.Handler {
 					return http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
@@ -150,7 +152,7 @@ func TestRouter(t *testing.T) {
 			requests: map[string]int{
 				"/": http.StatusOK,
 			},
-			rt: New("/"),
+			rt: NewRouter("/", ctxKey),
 			handlers: map[string]http.Handler{
 				"/": http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 					w.WriteHeader(http.StatusOK)
@@ -162,7 +164,7 @@ func TestRouter(t *testing.T) {
 			requests: map[string]int{
 				"/": http.StatusOK,
 			},
-			rt: New(""),
+			rt: NewRouter("", ctxKey),
 			handlers: map[string]http.Handler{
 				"/": http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 					w.WriteHeader(http.StatusOK)
@@ -174,7 +176,7 @@ func TestRouter(t *testing.T) {
 			requests: map[string]int{
 				"/": http.StatusOK,
 			},
-			rt: New("/"),
+			rt: NewRouter("/", ctxKey),
 			handlers: map[string]http.Handler{
 				"": http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 					w.WriteHeader(http.StatusOK)
@@ -186,7 +188,7 @@ func TestRouter(t *testing.T) {
 			requests: map[string]int{
 				"/": http.StatusOK,
 			},
-			rt: New(""),
+			rt: NewRouter("", ctxKey),
 			handlers: map[string]http.Handler{
 				"": http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 					w.WriteHeader(http.StatusOK)
@@ -199,20 +201,20 @@ func TestRouter(t *testing.T) {
 				"/123":          http.StatusOK,
 				"/123/test/456": http.StatusNoContent,
 			},
-			rt: New("/"),
+			rt: NewRouter("/", ctxKey),
 			handlers: map[string]http.Handler{
 				"/:test": http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					params = r.Context().Value(paramsKey).(Params)
+					params = Params(r.Context(), ctxKey)
 					w.WriteHeader(http.StatusOK)
 				}),
 				"/:test/test/:testing": http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					params = r.Context().Value(paramsKey).(Params)
+					params = Params(r.Context(), ctxKey)
 					w.WriteHeader(http.StatusNoContent)
 				}),
 			},
-			params: map[string]Params{
-				"/123":          Params{"test": "123"},
-				"/123/test/456": Params{"test": "123", "testing": "456"},
+			params: map[string]map[string]string{
+				"/123":          map[string]string{"test": "123"},
+				"/123/test/456": map[string]string{"test": "123", "testing": "456"},
 			},
 		},
 	}
@@ -220,7 +222,6 @@ func TestRouter(t *testing.T) {
 		t.Run("", func(t *testing.T) {
 			params = nil
 			tc.rt.SetDebug(true)
-			tc.rt.SetCtxKey(paramsKey)
 			tc.rt.Use(tc.fns...)
 
 			for path, handler := range tc.handlers {
@@ -262,7 +263,7 @@ func TestSubrouter(t *testing.T) {
 			requests: map[string]int{
 				"/mux/router/test": http.StatusOK,
 			},
-			rt:   New("/mux"),
+			rt:   NewRouter("/mux", ctxKey),
 			path: "/router",
 			handlers: map[string]http.Handler{
 				"/test": http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
@@ -275,7 +276,7 @@ func TestSubrouter(t *testing.T) {
 			requests: map[string]int{
 				"/mux/router/test": http.StatusOK,
 			},
-			rt:   New("/mux"),
+			rt:   NewRouter("/mux", ctxKey),
 			path: "/router",
 			handlers: map[string]http.Handler{
 				"/test": http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
@@ -288,7 +289,7 @@ func TestSubrouter(t *testing.T) {
 			requests: map[string]int{
 				"/": http.StatusOK,
 			},
-			rt:   New("/"),
+			rt:   NewRouter("/", ctxKey),
 			path: "/",
 			handlers: map[string]http.Handler{
 				"/": http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {

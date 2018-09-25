@@ -2,6 +2,7 @@ package mux
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -21,12 +22,16 @@ type Router struct {
 	placeholder byte
 }
 
-// New creates a new HTTP multiplexer.
-func New(path string) *Router {
+// NewRouter creates a new HTTP router.
+func NewRouter(path string, ctxKey interface{}) *Router {
+	if ctxKey == nil {
+		panic("mux: context key is nil") // panic early in order to prevent panicking during application runtime
+	}
 	return &Router{
 		path:        path,
 		methods:     make(map[string]*radix.Tree, 9),
 		placeholder: ':',
+		ctxKey:      ctxKey,
 	}
 }
 
@@ -59,12 +64,12 @@ func (rt *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	trie := rt.methods[r.Method]
-	if n, p := trie.Get(r.URL.Path); n != nil {
+	tr := rt.methods[r.Method]
+	if n, p := tr.Get(r.URL.Path); n != nil {
 		// Stores parameters in the request's context.
-		if len(p) > 0 && rt.ctxKey != nil {
+		if len(p) > 0 {
 			ctx := r.Context()
-			r = r.WithContext(context.WithValue(ctx, rt.ctxKey, Params(p)))
+			r = r.WithContext(context.WithValue(ctx, rt.ctxKey, p))
 		}
 		if handler, ok := n.Value.(http.Handler); ok {
 			handler.ServeHTTP(w, r)
@@ -96,9 +101,7 @@ func (rt *Router) SetPlaceholder(c byte) {
 func (rt *Router) String() string {
 	var bd strings.Builder
 	for k, v := range rt.methods {
-		bd.WriteString(k)
-		bd.WriteByte('\n')
-		bd.WriteString(v.String())
+		fmt.Fprintf(&bd, "\n%s%v", k, v)
 	}
 	return bd.String()
 }
@@ -110,7 +113,7 @@ func (rt *Router) Use(fns ...MiddlewareFunc) {
 
 func (rt *Router) handle(method, path string, handler http.Handler) {
 	fpn := rt.resolvePath(path)
-	chain := Chain(rt.fns...)(handler)
+	chain := NewChain(rt.fns...)(handler)
 	m := rt.methods[method]
 	if m == nil {
 		flag := 0
