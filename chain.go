@@ -2,10 +2,12 @@ package mux
 
 import "net/http"
 
-// Chain creates a chain of all middlewares plus a handler
-// to create a single handler linked to each other through a "next" handler.
-func Chain(fns ...MiddlewareFunc) MiddlewareFunc {
+// NewChain creates a middleware chain, which is a middleware itself.
+func NewChain(fns ...MiddlewareFunc) MiddlewareFunc {
 	return func(handler http.Handler) http.Handler {
+		if handler == nil {
+			panic("mux: handler is nil")
+		}
 		return build(handler, fns)
 	}
 }
