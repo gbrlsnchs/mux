@@ -48,11 +48,12 @@ func (rt *Router) HandleFunc(method, path string, handler http.HandlerFunc) {
 // Router creates a subrouter.
 func (rt *Router) Router(path string) *Router {
 	return &Router{
-		path:    rt.path + path,
-		methods: rt.methods,
-		fns:     rt.fns,
-		ctxKey:  rt.ctxKey,
-		debug:   rt.debug,
+		path:        rt.path + path,
+		methods:     rt.methods,
+		fns:         rt.fns,
+		ctxKey:      rt.ctxKey,
+		debug:       rt.debug,
+		placeholder: rt.placeholder,
 	}
 }
 
