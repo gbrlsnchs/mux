@@ -288,6 +288,110 @@ func TestRouter(t *testing.T) {
 		})
 	}
 }
+
+func TestSubrouterUse(t *testing.T) {
+	testCases := []struct {
+		parentFn     MiddlewareFunc
+		parentStatus int
+		childFn      MiddlewareFunc
+		childStatus  int
+	}{
+		{
+			parentFn: func(next http.Handler) http.Handler {
+				return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					next.ServeHTTP(w, r)
+				})
+			},
+			parentStatus: http.StatusOK,
+			childFn: func(next http.Handler) http.Handler {
+				return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					next.ServeHTTP(w, r)
+				})
+			},
+			childStatus: http.StatusOK,
+		},
+		{
+			parentFn: func(next http.Handler) http.Handler {
+				return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					w.WriteHeader(http.StatusBadRequest)
+					next.ServeHTTP(w, r)
+				})
+			},
+			parentStatus: http.StatusBadRequest,
+			childFn: func(next http.Handler) http.Handler {
+				return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					next.ServeHTTP(w, r)
+				})
+			},
+			childStatus: http.StatusBadRequest,
+		},
+		{
+			parentFn: func(next http.Handler) http.Handler {
+				return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					w.WriteHeader(http.StatusBadRequest)
+					next.ServeHTTP(w, r)
+				})
+			},
+			parentStatus: http.StatusBadRequest,
+			childFn: func(next http.Handler) http.Handler {
+				return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					w.WriteHeader(http.StatusBadGateway)
+					next.ServeHTTP(w, r)
+				})
+			},
+			childStatus: http.StatusBadRequest,
+		},
+		{
+			parentFn: func(next http.Handler) http.Handler {
+				return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					next.ServeHTTP(w, r)
+				})
+			},
+			parentStatus: http.StatusOK,
+			childFn: func(next http.Handler) http.Handler {
+				return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					w.WriteHeader(http.StatusBadGateway)
+					next.ServeHTTP(w, r)
+				})
+			},
+			childStatus: http.StatusBadGateway,
+		},
+	}
+	for _, tc := range testCases {
+		t.Run("", func(t *testing.T) {
+			var (
+				w *httptest.ResponseRecorder
+				r *http.Request
+			)
+			parent := NewRouter("/parent", ctxKey)
+			parent.Use(tc.parentFn)
+			parent.HandleFunc(http.MethodGet, "", func(w http.ResponseWriter, r *http.Request) {
+				w.Write([]byte("parent"))
+			})
+
+			child := parent.Router("/child")
+			child.Use(tc.childFn)
+			child.HandleFunc(http.MethodGet, "", func(w http.ResponseWriter, r *http.Request) {
+				w.Write([]byte("child"))
+			})
+
+			w = httptest.NewRecorder()
+			r = httptest.NewRequest(http.MethodGet, "/parent", nil)
+			parent.ServeHTTP(w, r)
+			if want, got := tc.parentStatus, w.Code; want != got {
+				t.Errorf("want %d, got %d", want, got)
+			}
+
+			w = httptest.NewRecorder()
+			r = httptest.NewRequest(http.MethodGet, "/parent/child", nil)
+			child.ServeHTTP(w, r)
+			if want, got := tc.childStatus, w.Code; want != got {
+				t.Errorf("want %d, got %d", want, got)
+			}
+		})
+	}
+}
+
 func TestSubrouter(t *testing.T) {
 	var params map[string]string
 	testCases := []struct {

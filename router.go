@@ -16,6 +16,7 @@ type MiddlewareFunc func(next http.Handler) http.Handler
 type Router struct {
 	path        string
 	methods     map[string]*radix.Tree
+	parentFns   []MiddlewareFunc
 	fns         []MiddlewareFunc
 	ctxKey      interface{}
 	debug       bool
@@ -27,12 +28,13 @@ func NewRouter(path string, ctxKey interface{}) *Router {
 	if ctxKey == nil {
 		panic("mux: context key is nil") // panic early in order to prevent panicking during application runtime
 	}
-	return &Router{
-		path:        path,
+	rt := &Router{
 		methods:     make(map[string]*radix.Tree, 9),
 		placeholder: ':',
 		ctxKey:      ctxKey,
 	}
+	rt.path = rt.resolvePath(path)
+	return rt
 }
 
 // Handle sets an HTTP request handler.
@@ -50,7 +52,7 @@ func (rt *Router) Router(path string) *Router {
 	return &Router{
 		path:        rt.path + path,
 		methods:     rt.methods,
-		fns:         rt.fns,
+		parentFns:   rt.fns,
 		ctxKey:      rt.ctxKey,
 		debug:       rt.debug,
 		placeholder: rt.placeholder,
@@ -78,12 +80,6 @@ func (rt *Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	http.NotFound(w, r)
-}
-
-// SetCtxKey sets the key for accessing parameters in the request's context object.
-// The idea is to make this key unique, maybe using enums or a UUID.
-func (rt *Router) SetCtxKey(v interface{}) {
-	rt.ctxKey = v
 }
 
 // SetDebug sets the debug flag.
@@ -114,7 +110,7 @@ func (rt *Router) Use(fns ...MiddlewareFunc) {
 
 func (rt *Router) handle(method, path string, handler http.Handler) {
 	fpn := rt.resolvePath(path)
-	chain := NewChain(rt.fns...)(handler)
+	chain := NewChain(append(rt.parentFns, rt.fns...)...)(handler)
 	m := rt.methods[method]
 	if m == nil {
 		flag := 0
