@@ -2,7 +2,7 @@
 [![Build Status](https://travis-ci.org/gbrlsnchs/mux.svg?branch=master)](https://travis-ci.org/gbrlsnchs/mux)
 [![Sourcegraph](https://sourcegraph.com/github.com/gbrlsnchs/mux/-/badge.svg)](https://sourcegraph.com/github.com/gbrlsnchs/mux?badge)
 [![GoDoc](https://godoc.org/github.com/gbrlsnchs/mux?status.svg)](https://godoc.org/github.com/gbrlsnchs/mux)
-[![Minimal version](https://img.shields.io/badge/minimal%20version-go1.10%2B-5272b4.svg)](https://golang.org/doc/go1.10)
+[![Minimal Version](https://img.shields.io/badge/minimal%20version-go1.10%2B-5272b4.svg)](https://golang.org/doc/go1.10)
 
 ## About
 This package is a fast HTTP multiplexer.
