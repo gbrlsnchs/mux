@@ -60,10 +60,10 @@ func loggingFunc(next http.Handler) http.Handler {
 ```go
 rt := mux.NewRouter("/api")
 rt.Use(loggingFunc)
-rt.Handle(http.MethodGet, "/ping", func(w http.ResponseWriter, _ *http.Request) {
+rt.Handle(http.MethodGet, "/ping", http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("pong"))
-})
+}))
 ```
 
 ### Setting isolated middlewares
